@@ -1,3 +1,1 @@
-Hola mi nombre es Hugo
-Estoy en la Universidad Tecnologica
-Estudio Desarrollo de Software
+Este es un ejemplo de contenido para el archivo.</br>Esta es una nueva línea añadida al archivo.</br>

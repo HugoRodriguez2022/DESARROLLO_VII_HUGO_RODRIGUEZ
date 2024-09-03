@@ -7,7 +7,9 @@ echo "Redondeado: " . round($numero) . "</br>";
 
 // Redondeo con precisión específica
 echo "Redondeado a 2 decimales: " . round($numero, 2) . "</br>";
+echo "Redondeado a 3 decimales: " . round($numero, 3) . "</br>";
 echo "Redondeado a 4 decimales: " . round($numero, 4) . "</br>";
+echo "Redondeado a 5 decimales: " . round($numero, 5) . "</br>";
 
 // Redondeo de números negativos
 $negativo = -5.7;
@@ -34,7 +36,7 @@ function redondearPrecio($precio) {
     return round($precio * 20) / 20;
 }
 
-$precios = [9.99, 10.49, 20.05, 5.75];
+$precios = [19.99, 7.42, 8.65, 18.75];
 echo "</br>Precios originales y redondeados:</br>";
 foreach ($precios as $precio) {
     echo "Original: $precio, Redondeado: " . redondearPrecio($precio) . "</br>";
