@@ -22,7 +22,7 @@ foreach ($carrito as $producto => $cantidad) {
     $subtotal += $productos[$producto] * $cantidad;
 }
 
-// Calcular descuento, impuesto y total
+
 $descuento = calcular_descuento($subtotal);
 $impuesto = aplicar_impuesto($subtotal);
 $total = calcular_total($subtotal, $descuento, $impuesto);
@@ -35,7 +35,7 @@ $total = calcular_total($subtotal, $descuento, $impuesto);
     <title>Resumen de Compra</title>
 </head>
 <body>
-    <h1>Resumen de Compra</h1>
+    <h1>Procesar Compras</h1>
     <ul>
         <?php foreach ($carrito as $producto => $cantidad): ?>
             <?php if ($cantidad > 0): ?>
