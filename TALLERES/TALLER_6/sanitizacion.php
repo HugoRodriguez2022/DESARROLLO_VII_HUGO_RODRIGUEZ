@@ -1,4 +1,4 @@
-<?php
+<?php 
 function sanitizarNombre($nombre) {
     return filter_var(trim($nombre), FILTER_SANITIZE_STRING);
 }
