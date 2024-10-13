@@ -7,8 +7,8 @@ function validarEmail($email) {
     return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
-function validarEdad($edad) {
-    return is_numeric($edad) && $edad >= 18 && $edad <= 120;
+function validarFechaNacimiento($fecha_nacimiento) {
+    return strtotime($fecha_nacimiento) !== false;
 }
 
 function validarSitioWeb($sitioWeb) {
