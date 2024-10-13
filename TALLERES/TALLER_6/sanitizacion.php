@@ -7,8 +7,8 @@ function sanitizarEmail($email) {
     return filter_var(trim($email), FILTER_SANITIZE_EMAIL);
 }
 
-function sanitizarEdad($edad) {
-    return filter_var($edad, FILTER_SANITIZE_NUMBER_INT);
+function sanitizarFechaNacimiento($fecha_nacimiento) {
+    return date("Y-m-d", strtotime($fecha_nacimiento));
 }
 
 function sanitizarSitioWeb($sitioWeb) {
@@ -26,6 +26,6 @@ function sanitizarIntereses($intereses) {
 }
 
 function sanitizarComentarios($comentarios) {
-    return htmlspecialchars(trim($comentarios), ENT_QUOTES, 'UTF-8');
+    return filter_var(trim($comentarios), FILTER_SANITIZE_STRING);
 }
 ?>
