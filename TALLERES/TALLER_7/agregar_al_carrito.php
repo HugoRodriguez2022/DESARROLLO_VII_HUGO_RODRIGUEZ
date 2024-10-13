@@ -1,5 +1,5 @@
 <?php
-require_once 'config_sesion.php';
+require_once 'configu_sesion.php';
 
 // Obtener el ID del producto
 $id_producto = filter_var($_GET['id'], FILTER_VALIDATE_INT);
