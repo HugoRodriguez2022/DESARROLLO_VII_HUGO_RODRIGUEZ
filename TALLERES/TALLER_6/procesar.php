@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $datos = [];
 
     // Procesar y validar cada campo
-    $campos = ['nombre', 'email', 'edad', 'sitio_web', 'genero', 'intereses', 'comentarios'];
+    $campos = ['nombre', 'email', 'fecha_nacimiento', 'sitio_web', 'genero', 'intereses', 'comentarios'];
     foreach ($campos as $campo) {
         if (isset($_POST[$campo])) {
             $valor = $_POST[$campo];
@@ -20,12 +20,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // Calcular edad automáticamente
+    $fecha_nacimiento = $datos['fecha_nacimiento'];
+    $edad = calcularEdad($fecha_nacimiento);
+    $datos['edad'] = $edad;
+
     // Procesar la foto de perfil
     if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] !== UPLOAD_ERR_NO_FILE) {
         if (!validarFotoPerfil($_FILES['foto_perfil'])) {
             $errores[] = "La foto de perfil no es válida.";
         } else {
-            $rutaDestino = 'uploads/' . basename($_FILES['foto_perfil']['name']);
+            $rutaDestino = 'uploads/' . uniqid() . '_' . basename($_FILES['foto_perfil']['name']);
             if (move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $rutaDestino)) {
                 $datos['foto_perfil'] = $rutaDestino;
             } else {
@@ -37,22 +42,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Mostrar resultados o errores
     if (empty($errores)) {
         echo "<h2>Datos Recibidos:</h2>";
+        echo "<table border='1'>";
         foreach ($datos as $campo => $valor) {
+            echo "<tr>";
+            echo "<th>" . ucfirst($campo) . "</th>";
             if ($campo === 'intereses') {
-                echo "$campo: " . implode(", ", $valor) . "<br>";
+                echo "<td>" . implode(", ", $valor) . "</td>";
             } elseif ($campo === 'foto_perfil') {
-                echo "$campo: <img src='$valor' width='100'><br>";
+                echo "<td><img src='$valor' width='100'></td>";
             } else {
-                echo "$campo: $valor<br>";
+                echo "<td>$valor</td>";
             }
+            echo "</tr>";
         }
+        echo "</table>";
     } else {
         echo "<h2>Errores:</h2>";
+        echo "<ul>";
         foreach ($errores as $error) {
-            echo "$error<br>";
+            echo "<li>$error</li>";
         }
+        echo "</ul>";
     }
-} else {
-    echo "Acceso no permitido.";
+
+    // Persistencia de datos
+    if (!empty($errores)) {
+        $_SESSION['datos_previos'] = $datos;
+    } else {
+        unset($_SESSION['datos_previos']);
+    }
+
+    echo "<br><a href='formulario.html'>Volver al formulario</a>";
+}
+
+function calcularEdad($fecha_nacimiento) {
+    $fecha_actual = date("Y-m-d");
+    $edad = date_diff(date_create($fecha_nacimiento), date_create($fecha_actual));
+    return $edad->y;
 }
 ?>
