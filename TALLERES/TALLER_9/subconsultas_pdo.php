@@ -1,4 +1,3 @@
-
 <?php
 require_once "config_pdo.php";
 
@@ -13,13 +12,12 @@ try {
                 FROM productos p2
                 WHERE p2.categoria_id = p.categoria_id
             )";
-
     $stmt = $pdo->query($sql);
     
     echo "<h3>Productos con precio mayor al promedio de su categoría:</h3>";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "Producto: {$row['nombre']}, Precio: {$row['precio']}, ";
-        echo "Categoría: {$row['categoria']}, Promedio categoría: {$row['promedio_categoria']}<br>";
+        echo "Producto: {$row['nombre']}, Precio: $" . number_format($row['precio'], 2) . ", ";
+        echo "Categoría: {$row['categoria']}, Promedio categoría: $" . number_format($row['promedio_categoria'], 2) . "<br>";
     }
 
     // 2. Clientes con compras superiores al promedio
@@ -35,79 +33,71 @@ try {
                 SELECT AVG(total)
                 FROM ventas
             )";
-
     $stmt = $pdo->query($sql);
     
     echo "<h3>Clientes con compras superiores al promedio:</h3>";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "Cliente: {$row['nombre']}, Total compras: {$row['total_compras']}, ";
-        echo "Promedio general: {$row['promedio_ventas']}<br>";
+        echo "Cliente: {$row['nombre']}, Total compras: $" . number_format($row['total_compras'], 2) . ", ";
+        echo "Promedio general: $" . number_format($row['promedio_ventas'], 2) . "<br>";
     }
 
-    $sql = "SELECT p.nombre, p.precio, c.nombre as categoria
-            FROM productos p
-            LEFT JOIN detalles_venta dv ON p.id = dv.producto_id
-            LEFT JOIN categorias c ON p.categoria_id = c.id
-            WHERE dv.producto_id IS NULL";
-
+    // 3. Productos que nunca se han vendido
+    $sql = "SELECT nombre FROM productos WHERE id NOT IN (SELECT producto_id FROM detalles_venta)";
     $stmt = $pdo->query($sql);
-    
+
     echo "<h3>Productos que nunca se han vendido:</h3>";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "Producto: {$row['nombre']}, Precio: {$row['precio']}, Categoría: {$row['categoria']}<br>";
+        echo "Producto: {$row['nombre']}<br>";
     }
 
-    // 2. Categorías con el número de productos y el valor total del inventario
-    $sql = "SELECT c.nombre, COUNT(p.id) as total_productos, SUM(p.precio * p.stock) as valor_total_inventario
-            FROM categorias c
-            LEFT JOIN productos p ON c.id = p.categoria_id
-            GROUP BY c.id";
-
+    // 4. Categorías con el número de productos y el valor total del inventario
+    $sql = "SELECT c.nombre, COUNT(p.id) as numero_productos, SUM(p.precio * p.stock) as valor_inventario
+        FROM categorias c
+        LEFT JOIN productos p ON c.id = p.categoria_id
+        GROUP BY c.id";
     $stmt = $pdo->query($sql);
-    
-    echo "<h3>Categorías con número de productos y valor total del inventario:</h3>";
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "Categoría: {$row['nombre']}, Total productos: {$row['total_productos']}, ";
-        echo "Valor total del inventario: {$row['valor_total_inventario']}<br>";
+
+    echo "<h3>Categorías con el número de productos y el valor total del inventario:</h3>";
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $valor_inventario = $row['valor_inventario'] !== null ? number_format($row['valor_inventario'], 2) : "0.00";
+    echo "Categoría: {$row['nombre']}, Número de productos: {$row['numero_productos']}, ";
+    echo "Valor total inventario: $" . $valor_inventario . "<br>";
     }
+    
 
-    // 3. Clientes que han comprado todos los productos de una categoría específica
-    $categoria_id = 1; // ID de la categoría específica
-
-    $sql = "SELECT c.nombre, c.email
+    // 5. Clientes que han comprado todos los productos de una categoría específica
+    $categoria_id = 1; // Ejemplo, categoría 'Electrónica'
+    $sql = "SELECT c.nombre
             FROM clientes c
             WHERE NOT EXISTS (
-                SELECT 1
+                SELECT p.id
                 FROM productos p
                 WHERE p.categoria_id = :categoria_id
                 AND p.id NOT IN (
-                    SELECT dv.producto_id
-                    FROM ventas v
-                    JOIN detalles_venta dv ON v.id = dv.venta_id
+                    SELECT producto_id FROM detalles_venta dv
+                    JOIN ventas v ON dv.venta_id = v.id
                     WHERE v.cliente_id = c.id
                 )
             )";
-
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['categoria_id' => $categoria_id]);
 
-    echo "<h3>Clientes que han comprado todos los productos de la categoría ID $categoria_id:</h3>";
+    echo "<h3>Clientes que han comprado todos los productos de una categoría específica:</h3>";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "Cliente: {$row['nombre']}, Email: {$row['email']}<br>";
+        echo "Cliente: {$row['nombre']}<br>";
     }
 
-    // 4. Porcentaje de ventas de cada producto respecto al total de ventas
+    // 6. Porcentaje de ventas de cada producto respecto al total de ventas
     $sql = "SELECT p.nombre, 
             (SUM(dv.cantidad * dv.precio_unitario) / (SELECT SUM(cantidad * precio_unitario) FROM detalles_venta) * 100) as porcentaje_ventas
             FROM productos p
             JOIN detalles_venta dv ON p.id = dv.producto_id
             GROUP BY p.id";
-
     $stmt = $pdo->query($sql);
-    
+
     echo "<h3>Porcentaje de ventas de cada producto respecto al total de ventas:</h3>";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "Producto: {$row['nombre']}, Porcentaje de ventas: {$row['porcentaje_ventas']}%<br>";
+        echo "Producto: {$row['nombre']}, Porcentaje de ventas: " . number_format($row['porcentaje_ventas'], 2) . "%<br>";
     }
 
 } catch(PDOException $e) {
@@ -116,4 +106,3 @@ try {
 
 $pdo = null;
 ?>
-        
